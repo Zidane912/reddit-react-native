@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "reddit-react",
-    "slug": "reddit-react",
+    "name": "reddit-react-native",
+    "slug": "reddit-react-native",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
