@@ -28,7 +28,6 @@ function PostDetailScreen() {
     setLoading(true);
     try {
       const data = await getPostById(postId);
-      console.log(data);
       setPost(data);
       setReplies(data.reply || []); // Ensure replies are loaded
     } catch (error) {

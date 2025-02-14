@@ -1,10 +1,4 @@
-import axios from 'axios';
-
-const api = axios.create({
-  // Point to your Laravel server's base URL
-  // e.g. 'http://localhost/my-laravel/public/api'
-  baseURL: 'http://192.168.0.102/api',
-});
+import api from './api';
 
 // Example: create a new reply
 export const createReply = async (postId, content) => {
