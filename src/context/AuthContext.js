@@ -1,41 +1,54 @@
-import React, { createContext, useEffect, useState, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load token when app loads
+  // Load both token and currentUser from storage on app startup
   useEffect(() => {
-    const loadToken = async () => {
+    const loadAuthData = async () => {
       try {
         const token = await AsyncStorage.getItem('api_token');
+        const user = await AsyncStorage.getItem('current_user');
         if (token) {
           setAuthToken(token);
         }
+        if (user) {
+          setCurrentUser(JSON.parse(user));
+        }
       } catch (error) {
-        console.error('Error loading token:', error);
+        console.error('Error loading auth data', error);
       } finally {
         setLoading(false);
       }
     };
-    loadToken();
+    loadAuthData();
   }, []);
 
-  const signIn = async (token) => {
-    await AsyncStorage.setItem('api_token', token);
-    setAuthToken(token);
+  const signIn = async (token, userData) => {
+    try {
+      await AsyncStorage.setItem('api_token', token);
+      await AsyncStorage.setItem('current_user', JSON.stringify(userData));
+      setAuthToken(token);
+      setCurrentUser(userData);
+    } catch (error) {
+      console.error('Error saving auth data:', error);
+    }
   };
 
   const signOut = async () => {
     await AsyncStorage.removeItem('api_token');
+    await AsyncStorage.removeItem('current_user');
     setAuthToken(null);
+    setCurrentUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ authToken, signIn, signOut, loading }}>
+    <AuthContext.Provider value={{ authToken, currentUser, signIn, signOut, loading }}>
       {children}
     </AuthContext.Provider>
   );

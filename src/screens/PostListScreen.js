@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Button } from 'react-native';
 import { getPosts, searchPosts } from '../api/posts';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 function PostListScreen() {
   const navigation = useNavigation();
@@ -12,6 +14,16 @@ function PostListScreen() {
   // Initial fetch when component mounts
   useEffect(() => {
     fetchPosts();
+    const loadAuthData = async () => {
+      try {
+        const token = await AsyncStorage.getItem('api_token');
+        const user = await AsyncStorage.getItem('current_user');
+      } catch (error) {
+        console.error('Error loading auth data:', error);
+      }
+    };
+  
+    loadAuthData();
   }, []);
 
   // Debounce search: whenever query changes, wait 500ms then trigger search

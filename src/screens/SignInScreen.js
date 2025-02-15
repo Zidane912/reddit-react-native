@@ -14,6 +14,7 @@ function SignInScreen() {
     try {
       const data = await signIn(username, password);
       await AsyncStorage.setItem('api_token', data.token);
+      await AsyncStorage.setItem('current_user', JSON.stringify(data.user)); // Store entire user object
       navigation.replace('PostList');
     } catch (error) {
       Alert.alert('Error', 'Invalid credentials');
