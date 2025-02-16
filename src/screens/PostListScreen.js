@@ -3,6 +3,8 @@ import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, B
 import { getPosts, searchPosts } from '../api/posts';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../context/AuthContext';
+
 
 
 function PostListScreen() {

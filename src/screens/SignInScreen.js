@@ -1,21 +1,21 @@
-// src/screens/SignInScreen.js
 import React, { useState } from 'react';
 import { View, TextInput, Button, Alert, StyleSheet } from 'react-native';
-import { signIn } from '../api/auth'; // Create this API function in src/api/auth.js
+import { signIn as signInApi } from '../api/auth'; // Your API function to sign in
 import { useNavigation } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../context/AuthContext';
 
 function SignInScreen() {
   const navigation = useNavigation();
+  const { signIn } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSignIn = async () => {
     try {
-      const data = await signIn(username, password);
-      await AsyncStorage.setItem('api_token', data.token);
-      await AsyncStorage.setItem('current_user', JSON.stringify(data.user)); // Store entire user object
-      navigation.replace('PostList');
+      const data = await signInApi(username, password);
+      // Update AuthContext state with the token and full user object.
+      signIn(data.token, data.user);
+      // No need for manual navigation here; RootNavigator will automatically switch stacks.
     } catch (error) {
       Alert.alert('Error', 'Invalid credentials');
     }
