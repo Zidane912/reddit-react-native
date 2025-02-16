@@ -5,8 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../context/AuthContext';
 
-
-
 function PostListScreen() {
   const navigation = useNavigation();
   const [posts, setPosts] = useState([]);
@@ -16,6 +14,7 @@ function PostListScreen() {
   // Initial fetch when component mounts
   useEffect(() => {
     fetchPosts();
+    // Optionally load auth data if needed
     const loadAuthData = async () => {
       try {
         const token = await AsyncStorage.getItem('api_token');
@@ -24,7 +23,6 @@ function PostListScreen() {
         console.error('Error loading auth data:', error);
       }
     };
-  
     loadAuthData();
   }, []);
 
@@ -37,7 +35,6 @@ function PostListScreen() {
         handleSearch(query);
       }
     }, 500);
-
     return () => clearTimeout(delayDebounceFn);
   }, [query]);
 
@@ -83,12 +80,10 @@ function PostListScreen() {
 
       <Button title="Create Post" onPress={() => navigation.navigate('CreatePost')} color="green" />
 
-
-      {/* Display ActivityIndicator below the search bar if loading; otherwise display the list */}
+      {/* Display ActivityIndicator if loading; otherwise display the list */}
       {loading ? (
         <ActivityIndicator size="large" style={{ marginVertical: 16 }} />
       ) : (
-        
         <FlatList
           data={posts}
           keyExtractor={(item) => item.id.toString()}
@@ -104,6 +99,9 @@ function PostListScreen() {
             >
               <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.title}</Text>
               <Text numberOfLines={2}>{item.content}</Text>
+              <Text style={{ fontSize: 12, color: 'gray' }}>
+                Category: {item.category && item.category.name ? item.category.name : 'Unknown'}
+              </Text>
             </TouchableOpacity>
           )}
         />

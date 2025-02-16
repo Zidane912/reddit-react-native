@@ -166,6 +166,10 @@ function PostDetailScreen() {
       <Text style={{ fontSize: 12, color: 'gray' }}>
         Posted by: {post.user ? post.user.username : 'Unknown'}
       </Text>
+      <Text style={{ fontSize: 12, color: 'gray' }}>
+        Category: {post.category && post.category.name ? post.category.name : 'Unknown'}
+      </Text>
+
 
       {/* Post Actions - only show Edit/Delete if current user is the owner */}
       {currentUser && currentUser.id === post.user_id && (
