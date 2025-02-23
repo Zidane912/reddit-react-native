@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   FlatList,
   TextInput,
-  Alert
+  Alert,
+  StyleSheet
 } from 'react-native';
 import { getPostById, likePost, dislikePost, deletePost } from '../api/posts';
 import { createReply, likeReply, dislikeReply, updateReply, deleteReply } from '../api/replies';
@@ -40,8 +41,7 @@ function PostDetailScreen() {
     try {
       const data = await getPostById(postId);
       setPost(data);
-      // Ensure backend returns replies in a property named "replies"
-      setReplies(data.reply || []);
+      setReplies(data.replies || []); // ensure backend returns replies as "replies"
     } catch (error) {
       console.error(error);
     } finally {
@@ -49,7 +49,7 @@ function PostDetailScreen() {
     }
   };
 
-  // ============= POST ACTIONS =============
+  // Post actions
   const handleLike = async () => {
     if (!post) return;
     try {
@@ -80,7 +80,7 @@ function PostDetailScreen() {
     }
   };
 
-  // ============= REPLY ACTIONS =============
+  // Reply actions
   const handleCreateReply = async () => {
     if (!newReplyText.trim()) {
       Alert.alert('Error', 'Reply content cannot be empty');
@@ -152,116 +152,234 @@ function PostDetailScreen() {
   };
 
   if (loading || !post) {
-    return <ActivityIndicator />;
+    return <ActivityIndicator style={styles.loading} size="large" />;
   }
 
-  return (
-    <View style={{ flex: 1, padding: 16 }}>
-      {/* Post Info */}
-      <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{post.title}</Text>
-      <Text style={{ fontSize: 16, marginVertical: 8 }}>{post.content}</Text>
-      <Text>Emoji: {post.emoji}</Text>
-      <Text>Likes: {post.likes}</Text>
-      <Text>Dislikes: {post.dislikes}</Text>
-      <Text style={{ fontSize: 12, color: 'gray' }}>
+  const renderHeader = () => (
+    <View style={styles.postCard}>
+      <Text style={styles.postTitle}>{post.title}</Text>
+      <Text style={styles.postContent}>{post.content}</Text>
+      <Text style={styles.postEmoji}>Emoji: {post.emoji}</Text>
+      <View style={styles.postStats}>
+        <Text style={styles.statText}>Likes: {post.likes}</Text>
+        <Text style={styles.statText}>Dislikes: {post.dislikes}</Text>
+      </View>
+      <Text style={styles.metaText}>
         Posted by: {post.user ? post.user.username : 'Unknown'}
       </Text>
-      <Text style={{ fontSize: 12, color: 'gray' }}>
+      <Text style={styles.metaText}>
         Category: {post.category && post.category.name ? post.category.name : 'Unknown'}
       </Text>
-
-
-      {/* Post Actions - only show Edit/Delete if current user is the owner */}
       {currentUser && currentUser.id === post.user_id && (
-        <>
+        <View style={styles.postActions}>
           <Button
             title="Edit Post"
             onPress={() => navigation.navigate('EditPost', { postId: post.id })}
-            color="blue"
+            color="#0079d3"
           />
-          <Button title="Delete Post" onPress={handleDelete} color="red" />
-        </>
+          <Button title="Delete Post" onPress={handleDelete} color="#ff4500" />
+        </View>
       )}
-      <Button title="Like" onPress={handleLike} />
-      <Button title="Dislike" onPress={handleDislike} />
-
-      {/* Replies Section */}
-      <Text style={{ marginTop: 20, fontSize: 18, fontWeight: 'bold' }}>
-        Replies:
-      </Text>
-      <FlatList
-        data={replies}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => {
-          return (
-            <View style={{ marginVertical: 8, borderBottomWidth: 1, paddingBottom: 8 }}>
-              <Text>{item.content}</Text>
-              <Text style={{ fontSize: 12, color: 'gray' }}>
-                By: {item.user ? item.user.username : 'Unknown'} | Likes: {item.likes} | Dislikes: {item.dislikes}
-              </Text>
-              {/* Conditional Reply Actions: only show Edit/Delete if currentUser is the reply owner */}
-              {currentUser && currentUser.id === item.user_id && (
-                <View style={{ flexDirection: 'row', marginTop: 5 }}>
-                  <TouchableOpacity onPress={() => startEditingReply(item.id, item.content)}>
-                    <Text style={{ marginRight: 10 }}>Edit</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => handleDeleteReply(item.id)}>
-                    <Text style={{ color: 'red' }}>Delete</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-              {/* Always show Like/Dislike for replies */}
-              <View style={{ flexDirection: 'row', marginTop: 5 }}>
-                <TouchableOpacity onPress={() => handleLikeReply(item.id)}>
-                  <Text style={{ marginRight: 10 }}>Like</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleDislikeReply(item.id)}>
-                  <Text style={{ marginRight: 10 }}>Dislike</Text>
-                </TouchableOpacity>
-              </View>
-              {/* Inline editing for a reply */}
-              {editReplyId === item.id && (
-                <View style={{ marginTop: 8, backgroundColor: '#f2f2f2', padding: 10 }}>
-                  <TextInput
-                    style={{ borderWidth: 1, padding: 5, marginBottom: 5 }}
-                    value={editReplyContent}
-                    onChangeText={setEditReplyContent}
-                  />
-                  <Button title="Save" onPress={handleUpdateReply} />
-                  <Button
-                    title="Cancel"
-                    color="gray"
-                    onPress={() => {
-                      setEditReplyId(null);
-                      setEditReplyContent('');
-                    }}
-                  />
-                </View>
-              )}
-            </View>
-          );
-        }}
-      />
-
-      {/* Create New Reply */}
-      <Text style={{ fontSize: 16, marginTop: 10, fontWeight: 'bold' }}>
-        Add a Reply:
-      </Text>
-      <TextInput
-        style={{
-          borderWidth: 1,
-          padding: 8,
-          marginTop: 8,
-          borderRadius: 5,
-          backgroundColor: '#fff',
-        }}
-        placeholder="Write your reply..."
-        value={newReplyText}
-        onChangeText={setNewReplyText}
-      />
-      <Button title="Post Reply" onPress={handleCreateReply} />
+      <View style={styles.voteActions}>
+        <Button title="Like" onPress={handleLike} />
+        <Button title="Dislike" onPress={handleDislike} />
+      </View>
+      <Text style={styles.sectionTitle}>Replies:</Text>
     </View>
   );
+
+  const renderReplyItem = ({ item }) => (
+    <View style={styles.replyCard}>
+      <Text style={styles.replyContent}>{item.content}</Text>
+      <Text style={styles.replyMeta}>
+        By: {item.user ? item.user.username : 'Unknown'} | Likes: {item.likes} | Dislikes: {item.dislikes}
+      </Text>
+      {currentUser && currentUser.id === item.user_id && (
+        <View style={styles.replyActions}>
+          <TouchableOpacity onPress={() => startEditingReply(item.id, item.content)}>
+            <Text style={styles.actionText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleDeleteReply(item.id)}>
+            <Text style={[styles.actionText, { color: '#ff4500' }]}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      <View style={styles.voteActions}>
+        <TouchableOpacity onPress={() => handleLikeReply(item.id)}>
+          <Text style={styles.actionText}>Like</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleDislikeReply(item.id)}>
+          <Text style={styles.actionText}>Dislike</Text>
+        </TouchableOpacity>
+      </View>
+      {editReplyId === item.id && (
+        <View style={styles.editContainer}>
+          <TextInput
+            style={styles.editInput}
+            value={editReplyContent}
+            onChangeText={setEditReplyContent}
+          />
+          <Button title="Save" onPress={handleUpdateReply} />
+          <Button
+            title="Cancel"
+            color="gray"
+            onPress={() => {
+              setEditReplyId(null);
+              setEditReplyContent('');
+            }}
+          />
+        </View>
+      )}
+    </View>
+  );
+
+  return (
+    <FlatList
+      ListHeaderComponent={renderHeader}
+      data={replies}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={renderReplyItem}
+      contentContainerStyle={styles.listContainer}
+      ListFooterComponent={
+        <View style={styles.newReplyContainer}>
+          <Text style={styles.sectionTitle}>Add a Reply:</Text>
+          <TextInput
+            style={styles.newReplyInput}
+            placeholder="Write your reply..."
+            value={newReplyText}
+            onChangeText={setNewReplyText}
+          />
+          <Button title="Post Reply" onPress={handleCreateReply} color="#0079d3" />
+        </View>
+      }
+    />
+  );
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#f6f7f8',
+    padding: 16,
+  },
+  listContainer: {
+    paddingBottom: 16,
+  },
+  postCard: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  postTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#333',
+  },
+  postContent: {
+    fontSize: 16,
+    color: '#444',
+    marginBottom: 12,
+  },
+  postEmoji: {
+    fontSize: 14,
+    color: '#777',
+    marginBottom: 8,
+  },
+  postStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  statText: {
+    fontSize: 14,
+    color: '#555',
+  },
+  metaText: {
+    fontSize: 12,
+    color: '#777',
+    marginBottom: 4,
+  },
+  postActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 8,
+  },
+  voteActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 8,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#333',
+  },
+  replyCard: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  replyContent: {
+    fontSize: 16,
+    color: '#444',
+  },
+  replyMeta: {
+    fontSize: 12,
+    color: '#777',
+    marginBottom: 4,
+  },
+  replyActions: {
+    flexDirection: 'row',
+  },
+  actionText: {
+    fontSize: 14,
+    color: '#0079d3',
+    marginRight: 10,
+  },
+  editContainer: {
+    marginTop: 8,
+    backgroundColor: '#f2f2f2',
+    padding: 10,
+    borderRadius: 5,
+  },
+  editInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 8,
+    marginBottom: 8,
+    borderRadius: 5,
+  },
+  newReplyContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+  },
+  newReplyInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 12,
+  },
+});
 
 export default PostDetailScreen;
