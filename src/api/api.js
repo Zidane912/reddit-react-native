@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const api = axios.create({
-  baseURL: 'http://192.168.0.102/api', // your API URL
+  baseURL: 'https://redditcloneapp.co.uk/api', // your API URL
 });
 
 // Attach token to every request
