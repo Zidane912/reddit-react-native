@@ -6,9 +6,9 @@ import {
   Alert, 
   StyleSheet, 
   Text, 
-  ScrollView 
+  FlatList 
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { createPost } from '../api/posts';
 import { getCategories } from '../api/categories';
 import { useNavigation } from '@react-navigation/native';
@@ -17,16 +17,21 @@ function CreatePostScreen() {
   const navigation = useNavigation();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [items, setItems] = useState([]);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const data = await getCategories();
-        setCategories(data);
-        if (data.length > 0) {
-          setSelectedCategory(data[0].id.toString());
+        const dropdownItems = data.map(cat => ({
+          label: cat.name,
+          value: cat.id.toString(),
+        }));
+        setItems(dropdownItems);
+        if (dropdownItems.length > 0) {
+          setSelectedCategory(dropdownItems[0].value);
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -50,44 +55,54 @@ function CreatePostScreen() {
     }
   };
 
-  return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>Create Post</Text>
-
-      <View style={styles.card}>
-        <TextInput
-          style={styles.input}
-          placeholder="Title"
-          placeholderTextColor="#777"
-          value={title}
-          onChangeText={setTitle}
-        />
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          placeholder="Content"
-          placeholderTextColor="#777"
-          value={content}
-          onChangeText={setContent}
-          multiline
-        />
-        <Text style={styles.label}>Select Category:</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            mode="dropdown"
-            selectedValue={selectedCategory}
-            onValueChange={(itemValue) => setSelectedCategory(itemValue)}
-            style={styles.picker}
-          >
-            {categories.map((cat) => (
-              <Picker.Item key={cat.id} label={cat.name} value={cat.id.toString()} />
-            ))}
-          </Picker>
-        </View>
-        <View style={styles.buttonWrapper}>
-          <Button title="Create Post" onPress={handleSave} color="#ff4500" />
-        </View>
+  // Render the form as a header component
+  const renderForm = () => (
+    <View style={styles.card}>
+      <TextInput
+        style={styles.input}
+        placeholder="Title"
+        placeholderTextColor="#777"
+        value={title}
+        onChangeText={setTitle}
+      />
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        placeholder="Content"
+        placeholderTextColor="#777"
+        value={content}
+        onChangeText={setContent}
+        multiline
+      />
+      <Text style={styles.label}>Select Category:</Text>
+      <DropDownPicker
+        open={open}
+        value={selectedCategory}
+        items={items}
+        setOpen={setOpen}
+        setValue={setSelectedCategory}
+        setItems={setItems}
+        containerStyle={styles.dropdownContainer}
+        style={styles.dropdown}
+        dropDownContainerStyle={styles.dropdownList}
+      />
+      <View style={styles.buttonWrapper}>
+        <Button title="Create Post" onPress={handleSave} color="#ff4500" />
       </View>
-    </ScrollView>
+    </View>
+  );
+
+  return (
+    <FlatList
+      data={[]}  // Since your form isn't really a list, leave data empty
+      keyExtractor={() => 'dummy'}
+      ListHeaderComponent={
+        <View style={styles.container}>
+          <Text style={styles.header}>Create Post</Text>
+          {renderForm()}
+        </View>
+      }
+      renderItem={null}
+    />
   );
 }
 
@@ -133,17 +148,14 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 4,
   },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    backgroundColor: '#fff',
+  dropdownContainer: {
     marginBottom: 16,
-    overflow: 'visible',
   },
-  picker: {
-    height: 50,
-    width: '100%',
+  dropdown: {
+    borderColor: '#ccc',
+  },
+  dropdownList: {
+    borderColor: '#ccc',
   },
   buttonWrapper: {
     marginTop: 8,

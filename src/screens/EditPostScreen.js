@@ -8,7 +8,7 @@ import {
   Alert, 
   StyleSheet 
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { getPostById, updatePost } from '../api/posts';
 import { getCategories } from '../api/categories';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -24,8 +24,9 @@ function EditPostScreen() {
   // Form fields
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [items, setItems] = useState([]);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     fetchPost();
@@ -39,8 +40,9 @@ function EditPostScreen() {
       setPost(data);
       setTitle(data.title);
       setContent(data.content);
-      // Use the accessor that returns a category object, if available.
-      setSelectedCategory(data.category ? data.category.id.toString() : '');
+      if (data.category) {
+        setSelectedCategory(data.category.id.toString());
+      }
     } catch (error) {
       console.error(error);
     } finally {
@@ -51,9 +53,13 @@ function EditPostScreen() {
   const fetchCategories = async () => {
     try {
       const data = await getCategories();
-      setCategories(data);
-      if (!selectedCategory && data.length > 0) {
-        setSelectedCategory(data[0].id.toString());
+      const dropdownItems = data.map(cat => ({
+        label: cat.name,
+        value: cat.id.toString(),
+      }));
+      setItems(dropdownItems);
+      if (!selectedCategory && dropdownItems.length > 0) {
+        setSelectedCategory(dropdownItems[0].value);
       }
     } catch (error) {
       console.error(error);
@@ -66,7 +72,6 @@ function EditPostScreen() {
       return;
     }
     try {
-      // Pass category_id as an integer
       await updatePost(postId, { 
         title, 
         content, 
@@ -106,18 +111,17 @@ function EditPostScreen() {
       />
 
       <Text style={styles.label}>Category:</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          mode="dropdown" // ensures dropdown behavior on Android
-          selectedValue={selectedCategory}
-          onValueChange={(itemValue) => setSelectedCategory(itemValue)}
-          style={styles.picker}
-        >
-          {categories.map((cat) => (
-            <Picker.Item key={cat.id} label={cat.name} value={cat.id.toString()} />
-          ))}
-        </Picker>
-      </View>
+      <DropDownPicker
+        open={open}
+        value={selectedCategory}
+        items={items}
+        setOpen={setOpen}
+        setValue={setSelectedCategory}
+        setItems={setItems}
+        containerStyle={styles.dropdownContainer}
+        style={styles.dropdown}
+        dropDownContainerStyle={styles.dropdownList}
+      />
       
       <View style={styles.buttonContainer}>
         <Button title="Update Post" onPress={handleUpdate} color="#28a745" />
@@ -161,17 +165,16 @@ const styles = StyleSheet.create({
     height: 100,
     textAlignVertical: 'top',
   },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    backgroundColor: '#fff',
-    borderRadius: 8,
+  dropdownContainer: {
     marginBottom: 16,
-    overflow: 'visible', // allow dropdown options to display properly
+    zIndex: 1000, // Ensures the dropdown renders above other elements on iOS
   },
-  picker: {
-    height: 50,
-    width: '100%',
+  dropdown: {
+    borderColor: '#ccc',
+  },
+  dropdownList: {
+    borderColor: '#ccc',
+    zIndex: 1000,
   },
   buttonContainer: {
     flexDirection: 'row',
