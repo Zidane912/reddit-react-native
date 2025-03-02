@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { ActivityIndicator, View } from 'react-native';
-import { AuthProvider, useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import AuthStack from './AuthStack';
 import AppStack from './AppStack';
 
@@ -21,11 +21,9 @@ const RootNavigator = () => {
 
 function App() {
   return (
-    <AuthProvider>
       <NavigationContainer>
         <RootNavigator />
       </NavigationContainer>
-    </AuthProvider>
   );
 }
 
