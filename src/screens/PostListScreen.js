@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { getPosts, searchPosts } from '../api/posts';
 import { useNavigation } from '@react-navigation/native';
+import categories from '../data/categories';
 
 function PostListScreen() {
   const navigation = useNavigation();
@@ -59,22 +60,25 @@ function PostListScreen() {
     }
   };
 
-  const renderPostItem = ({ item }) => (
-    <TouchableOpacity
-      onPress={() => navigation.navigate('PostDetail', { postId: item.id })}
-      style={styles.postCard}
-    >
-      <Text style={styles.postTitle}>{item.title}</Text>
-      <Text style={styles.postContent} numberOfLines={2}>
-        {item.content}
-      </Text>
-      <View style={styles.postFooter}>
-        <Text style={styles.categoryText}>
-          Category: {item.category && item.category.name ? item.category.name : 'Unknown'}
+  const renderPostItem = ({ item }) => {
+    const categoryObj = categories.find(category => category.id === item.category_id);
+    return (
+      <TouchableOpacity
+        onPress={() => navigation.navigate('PostDetail', { postId: item.id })}
+        style={styles.postCard}
+      >
+        <Text style={styles.postTitle}>{item.title}</Text>
+        <Text style={styles.postContent} numberOfLines={2}>
+          {item.content}
         </Text>
-      </View>
-    </TouchableOpacity>
-  );
+        <View style={styles.postFooter}>
+          <Text style={styles.categoryText}>
+            Category: {categoryObj ? categoryObj.name : 'Unknown'}
+          </Text>
+        </View>
+      </TouchableOpacity>
+      )
+  };
 
   return (
     <View style={styles.container}>

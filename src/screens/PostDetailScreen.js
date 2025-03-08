@@ -14,6 +14,7 @@ import { getPostById, likePost, dislikePost, deletePost } from '../api/posts';
 import { createReply, likeReply, dislikeReply, updateReply, deleteReply } from '../api/replies';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
+import categories from '../data/categories';
 
 function PostDetailScreen() {
   const route = useRoute();
@@ -42,6 +43,7 @@ function PostDetailScreen() {
       const data = await getPostById(postId);
       setPost(data);
       setReplies(data.replies || []); // ensure backend returns replies as "replies"
+      
     } catch (error) {
       console.error(error);
     } finally {
@@ -155,7 +157,9 @@ function PostDetailScreen() {
     return <ActivityIndicator style={styles.loading} size="large" />;
   }
 
-  const renderHeader = () => (
+  const renderHeader = () => {
+    const categoryObj = categories.find(category => category.id === post.category_id);
+    return (
     <View style={styles.postCard}>
       <Text style={styles.postTitle}>{post.title}</Text>
       <Text style={styles.postContent}>{post.content}</Text>
@@ -168,7 +172,7 @@ function PostDetailScreen() {
         Posted by: {post.user ? post.user.username : 'Unknown'}
       </Text>
       <Text style={styles.metaText}>
-        Category: {post.category && post.category.name ? post.category.name : 'Unknown'}
+        Category: {categoryObj ? categoryObj.name : 'Unknown'}
       </Text>
       {currentUser && currentUser.id === post.user_id && (
         <View style={styles.postActions}>
@@ -186,7 +190,8 @@ function PostDetailScreen() {
       </View>
       <Text style={styles.sectionTitle}>Replies:</Text>
     </View>
-  );
+    )
+  };
 
   const renderReplyItem = ({ item }) => (
     <View style={styles.replyCard}>
