@@ -10,17 +10,19 @@ import {
 } from 'react-native';
 import { getPosts, searchPosts } from '../api/posts';
 import { useNavigation } from '@react-navigation/native';
-import categories from '../data/categories';
+import { getCategories } from '../api/categories';
 
 function PostListScreen() {
   const navigation = useNavigation();
   const [posts, setPosts] = useState([]);
+  const [categories, setCategories] = useState([]); // New state for categories
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState('');
 
   // Initial fetch when component mounts
   useEffect(() => {
     fetchPosts();
+    fetchCategories();
   }, []);
 
   // Debounce search: when query changes, wait 500ms then trigger search
@@ -45,6 +47,15 @@ function PostListScreen() {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error(error);
     }
   };
 

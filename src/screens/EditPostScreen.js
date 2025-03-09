@@ -40,8 +40,8 @@ function EditPostScreen() {
       setPost(data);
       setTitle(data.title);
       setContent(data.content);
-      if (data.category) {
-        setSelectedCategory(data.category.id.toString());
+      if (data.category_id) {
+        setSelectedCategory(data.category_id.toString());
       }
     } catch (error) {
       console.error(error);
@@ -58,9 +58,6 @@ function EditPostScreen() {
         value: cat.id.toString(),
       }));
       setItems(dropdownItems);
-      if (!selectedCategory && dropdownItems.length > 0) {
-        setSelectedCategory(dropdownItems[0].value);
-      }
     } catch (error) {
       console.error(error);
     }

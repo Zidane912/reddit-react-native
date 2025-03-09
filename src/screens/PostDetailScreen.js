@@ -12,9 +12,9 @@ import {
 } from 'react-native';
 import { getPostById, likePost, dislikePost, deletePost } from '../api/posts';
 import { createReply, likeReply, dislikeReply, updateReply, deleteReply } from '../api/replies';
+import { getCategories } from '../api/categories'; // Use the API call here
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
-import categories from '../data/categories';
 
 function PostDetailScreen() {
   const route = useRoute();
@@ -23,6 +23,7 @@ function PostDetailScreen() {
   const { currentUser } = useAuth();
 
   const [post, setPost] = useState(null);
+  const [categories, setCategories] = useState([]); // New state for categories
   const [loading, setLoading] = useState(true);
 
   // Replies-related states
@@ -35,6 +36,7 @@ function PostDetailScreen() {
 
   useEffect(() => {
     fetchPost();
+    fetchCategories(); // Fetch categories when the component mounts
   }, [postId]);
 
   const fetchPost = async () => {
@@ -42,12 +44,20 @@ function PostDetailScreen() {
     try {
       const data = await getPostById(postId);
       setPost(data);
-      setReplies(data.replies || []); // ensure backend returns replies as "replies"
-      
+      setReplies(data.replies || []);
     } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const data = await getCategories();
+      setCategories(data);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -158,39 +168,41 @@ function PostDetailScreen() {
   }
 
   const renderHeader = () => {
+    // Use the categories fetched from the API to look up the category name
     const categoryObj = categories.find(category => category.id === post.category_id);
+    
     return (
-    <View style={styles.postCard}>
-      <Text style={styles.postTitle}>{post.title}</Text>
-      <Text style={styles.postContent}>{post.content}</Text>
-      <Text style={styles.postEmoji}>Emoji: {post.emoji}</Text>
-      <View style={styles.postStats}>
-        <Text style={styles.statText}>Likes: {post.likes}</Text>
-        <Text style={styles.statText}>Dislikes: {post.dislikes}</Text>
-      </View>
-      <Text style={styles.metaText}>
-        Posted by: {post.user ? post.user.username : 'Unknown'}
-      </Text>
-      <Text style={styles.metaText}>
-        Category: {categoryObj ? categoryObj.name : 'Unknown'}
-      </Text>
-      {currentUser && currentUser.id === post.user_id && (
-        <View style={styles.postActions}>
-          <Button
-            title="Edit Post"
-            onPress={() => navigation.navigate('EditPost', { postId: post.id })}
-            color="#0079d3"
-          />
-          <Button title="Delete Post" onPress={handleDelete} color="#ff4500" />
+      <View style={styles.postCard}>
+        <Text style={styles.postTitle}>{post.title}</Text>
+        <Text style={styles.postContent}>{post.content}</Text>
+        <Text style={styles.postEmoji}>Emoji: {post.emoji}</Text>
+        <View style={styles.postStats}>
+          <Text style={styles.statText}>Likes: {post.likes}</Text>
+          <Text style={styles.statText}>Dislikes: {post.dislikes}</Text>
         </View>
-      )}
-      <View style={styles.voteActions}>
-        <Button title="Like" onPress={handleLike} />
-        <Button title="Dislike" onPress={handleDislike} />
+        <Text style={styles.metaText}>
+          Posted by: {post.user ? post.user.username : 'Unknown'}
+        </Text>
+        <Text style={styles.metaText}>
+          Category: {categoryObj ? categoryObj.name : 'Unknown'}
+        </Text>
+        {currentUser && currentUser.id === post.user_id && (
+          <View style={styles.postActions}>
+            <Button
+              title="Edit Post"
+              onPress={() => navigation.navigate('EditPost', { postId: post.id })}
+              color="#0079d3"
+            />
+            <Button title="Delete Post" onPress={handleDelete} color="#ff4500" />
+          </View>
+        )}
+        <View style={styles.voteActions}>
+          <Button title="Like" onPress={handleLike} />
+          <Button title="Dislike" onPress={handleDislike} />
+        </View>
+        <Text style={styles.sectionTitle}>Replies:</Text>
       </View>
-      <Text style={styles.sectionTitle}>Replies:</Text>
-    </View>
-    )
+    );
   };
 
   const renderReplyItem = ({ item }) => (
