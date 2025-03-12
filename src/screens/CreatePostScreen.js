@@ -46,9 +46,13 @@ function CreatePostScreen() {
       return;
     }
     try {
-      await createPost({ title, content, category_id: parseInt(selectedCategory) });
+      const newPost = await createPost({
+        title,
+        content,
+        category_id: parseInt(selectedCategory),
+      });
       Alert.alert('Success', 'Post created successfully');
-      navigation.goBack();
+      navigation.navigate('PostDetail', { postId: newPost.id });
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Could not create post');

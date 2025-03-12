@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -36,8 +37,14 @@ function PostDetailScreen() {
 
   useEffect(() => {
     fetchPost();
-    fetchCategories(); // Fetch categories when the component mounts
+    fetchCategories();
   }, [postId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchPost();
+    }, [])
+  );
 
   const fetchPost = async () => {
     setLoading(true);
@@ -86,7 +93,7 @@ function PostDetailScreen() {
     if (!post) return;
     try {
       await deletePost(post.id);
-      navigation.goBack();
+      navigation.navigate('PostList');
     } catch (error) {
       console.error(error);
     }

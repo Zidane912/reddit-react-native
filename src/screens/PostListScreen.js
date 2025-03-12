@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { 
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';import { 
   View, 
   Text, 
   FlatList, 
@@ -24,6 +24,12 @@ function PostListScreen() {
     fetchPosts();
     fetchCategories();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchPosts();
+    }, [])
+  );
 
   // Debounce search: when query changes, wait 500ms then trigger search
   useEffect(() => {
