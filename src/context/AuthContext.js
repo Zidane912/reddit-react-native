@@ -47,6 +47,21 @@ export const AuthProvider = ({ children }) => {
     setCurrentUser(null);
   };
 
+  // Set a timer to automatically sign out the user after a fixed duration
+  useEffect(() => {
+    let timer;
+    const TIMEOUT_DURATION = 3600000; // 1 hour in milliseconds
+    if (authToken) {
+      timer = setTimeout(() => {
+        console.log('Session expired. Signing out...');
+        signOut();
+      }, TIMEOUT_DURATION);
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [authToken]);
+
   return (
     <AuthContext.Provider value={{ authToken, currentUser, signIn, signOut, loading }}>
       {children}
