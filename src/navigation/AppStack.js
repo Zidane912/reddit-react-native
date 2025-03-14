@@ -7,7 +7,7 @@ const Drawer = createDrawerNavigator();
 
 const AppStack = () => (
   <Drawer.Navigator initialRouteName="MainStack" screenOptions={{ swipeEnabled: true }}>
-    <Drawer.Screen name="MainStack" component={MainStack} options={{ headerShown: false }} />
+    <Drawer.Screen name="MainStack" component={MainStack} options={{ headerShown: false, title: 'Main Page' }} />
     <Drawer.Screen name="Settings" component={SettingsScreen} />
   </Drawer.Navigator>
 );

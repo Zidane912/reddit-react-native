@@ -86,7 +86,7 @@ function PostListScreen() {
       >
         <Text style={styles.postTitle}>{item.title}</Text>
         <Text style={styles.postContent} numberOfLines={2}>
-          {item.content}
+          {item.summary}
         </Text>
         <View style={styles.postFooter}>
           <Text style={styles.categoryText}>

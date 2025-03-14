@@ -51,7 +51,7 @@ function PostDetailScreen() {
     try {
       const data = await getPostById(postId);
       setPost(data);
-      setReplies(data.replies || []);
+      setReplies(data.reply || []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -89,15 +89,32 @@ function PostDetailScreen() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!post) return;
-    try {
-      await deletePost(post.id);
-      navigation.navigate('PostList');
-    } catch (error) {
-      console.error(error);
-    }
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Post",
+      "Are you sure you want to delete this post?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deletePost(post.id);
+              navigation.navigate('PostList');
+            } catch (error) {
+              console.error(error);
+            }
+          }
+        }
+      ],
+      { cancelable: true }
+    );
   };
+  
 
   // Reply actions
   const handleCreateReply = async () => {
@@ -161,13 +178,30 @@ function PostDetailScreen() {
   };
 
   const handleDeleteReply = async (replyId) => {
-    try {
-      await deleteReply(replyId);
-      setReplies((prev) => prev.filter((r) => r.id !== replyId));
-      Alert.alert('Success', 'Reply deleted!');
-    } catch (error) {
-      console.error(error);
-    }
+    Alert.alert(
+      "Delete Reply",
+      "Are you sure you want to delete this reply?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteReply(replyId);
+              setReplies((prev) => prev.filter((r) => r.id !== replyId));
+              Alert.alert("Success", "Reply deleted!");
+            } catch (error) {
+              console.error(error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   if (loading || !post) {
@@ -215,6 +249,7 @@ function PostDetailScreen() {
   const renderReplyItem = ({ item }) => (
     <View style={styles.replyCard}>
       <Text style={styles.replyContent}>{item.content}</Text>
+      <Text style={styles.replyContent}>{item.emoji}</Text>
       <Text style={styles.replyMeta}>
         By: {item.user ? item.user.username : 'Unknown'} | Likes: {item.likes} | Dislikes: {item.dislikes}
       </Text>
