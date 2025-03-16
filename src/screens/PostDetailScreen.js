@@ -115,6 +115,8 @@ function PostDetailScreen() {
     }
     try {
       const newReply = await createReply(post.id, newReplyText);
+      // Attach the current user's data so that username displays immediately.
+      newReply.user = currentUser;
       setReplies([...replies, newReply]);
       setNewReplyText('');
       Alert.alert('Success', 'Reply created!');
@@ -122,6 +124,7 @@ function PostDetailScreen() {
       console.error(error);
     }
   };
+  
 
   const handleLikeReply = async (replyId) => {
     try {
