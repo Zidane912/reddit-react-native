@@ -115,15 +115,19 @@ function PostListScreen() {
 
       {/* Posts List or Loading Indicator */}
       {loading ? (
-        <ActivityIndicator size="large" style={{ marginVertical: 16 }} />
-      ) : (
-        <FlatList
-          data={posts}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderPostItem}
-          contentContainerStyle={styles.listContainer}
-        />
-      )}
+  <ActivityIndicator size="large" style={{ marginVertical: 16 }} />
+) : posts.length > 0 ? (
+  <FlatList
+    data={posts}
+    keyExtractor={(item) => item.id.toString()}
+    renderItem={renderPostItem}
+    contentContainerStyle={styles.listContainer}
+  />
+) : (
+  <Text style={styles.noPostsText}>
+    Sorry, no posts match your search
+  </Text>
+)}
     </View>
   );
 }
@@ -191,6 +195,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#777',
   },
+  noPostsText: {
+    textAlign: 'center',
+    marginTop: 16,
+    fontSize: 16,
+    color: '#777',
+  },  
 });
 
 export default PostListScreen;

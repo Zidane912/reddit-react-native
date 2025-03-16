@@ -1,16 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import {
-  View,
-  Text,
-  Button,
-  ActivityIndicator,
-  TouchableOpacity,
-  FlatList,
-  TextInput,
-  Alert,
-  StyleSheet
-} from 'react-native';
+import { View, Text, Button, ActivityIndicator, TouchableOpacity, FlatList, TextInput, Alert, StyleSheet } from 'react-native';
+import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { getPostById, likePost, dislikePost, deletePost } from '../api/posts';
 import { createReply, likeReply, dislikeReply, updateReply, deleteReply } from '../api/replies';
 import { getCategories } from '../api/categories'; // Use the API call here
@@ -114,7 +105,7 @@ function PostDetailScreen() {
       { cancelable: true }
     );
   };
-  
+
 
   // Reply actions
   const handleCreateReply = async () => {
@@ -211,7 +202,7 @@ function PostDetailScreen() {
   const renderHeader = () => {
     // Use the categories fetched from the API to look up the category name
     const categoryObj = categories.find(category => category.id === post.category_id);
-    
+
     return (
       <View style={styles.postCard}>
         <Text style={styles.postTitle}>{post.title}</Text>
@@ -227,21 +218,33 @@ function PostDetailScreen() {
         <Text style={styles.metaText}>
           Category: {categoryObj ? categoryObj.name : 'Unknown'}
         </Text>
-        {currentUser && currentUser.id === post.user_id && (
-          <View style={styles.postActions}>
-            <Button
-              title="Edit Post"
-              onPress={() => navigation.navigate('EditPost', { postId: post.id })}
-              color="#0079d3"
-            />
-            <Button title="Delete Post" onPress={handleDelete} color="#ff4500" />
+        <View>
+          <View style={styles.iconsRow}>
+            {currentUser && currentUser.id === post.user_id && (
+              <>
+                <TouchableOpacity
+                  style={styles.iconButton}
+                  onPress={() => navigation.navigate('EditPost', { postId: post.id })}
+                >
+                  <FontAwesome5 name="edit" size={20} color="#0079d3" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.iconButton}
+                  onPress={handleDelete}
+                >
+                  <FontAwesome5 name="trash-alt" size={20} color="#ff4500" />
+                </TouchableOpacity>
+              </>
+            )}
+            <TouchableOpacity style={styles.iconButton} onPress={handleLike}>
+              <FontAwesome5 name="thumbs-up" size={20} color="#0079d3" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton} onPress={handleDislike}>
+              <FontAwesome5 name="thumbs-down" size={20} color="#ff4500" />
+            </TouchableOpacity>
           </View>
-        )}
-        <View style={styles.voteActions}>
-          <Button title="Like" onPress={handleLike} />
-          <Button title="Dislike" onPress={handleDislike} />
+          <Text style={styles.sectionTitle}>Replies:</Text>
         </View>
-        <Text style={styles.sectionTitle}>Replies:</Text>
       </View>
     );
   };
@@ -253,22 +256,28 @@ function PostDetailScreen() {
       <Text style={styles.replyMeta}>
         By: {item.user ? item.user.username : 'Unknown'} | Likes: {item.likes} | Dislikes: {item.dislikes}
       </Text>
-      {currentUser && currentUser.id === item.user_id && (
-        <View style={styles.replyActions}>
-          <TouchableOpacity onPress={() => startEditingReply(item.id, item.content)}>
-            <Text style={styles.actionText}>Edit</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleDeleteReply(item.id)}>
-            <Text style={[styles.actionText, { color: '#ff4500' }]}>Delete</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      <View style={styles.voteActions}>
-        <TouchableOpacity onPress={() => handleLikeReply(item.id)}>
-          <Text style={styles.actionText}>Like</Text>
+      <View style={styles.replyRow}>
+        {currentUser && currentUser.id === item.user_id && (
+          <>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => startEditingReply(item.id, item.content)}
+            >
+              <FontAwesome5 name="edit" size={16} color="#0079d3" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => handleDeleteReply(item.id)}
+            >
+              <FontAwesome5 name="trash-alt" size={16} color="#ff4500" />
+            </TouchableOpacity>
+          </>
+        )}
+        <TouchableOpacity style={styles.iconButton} onPress={() => handleLikeReply(item.id)}>
+          <FontAwesome5 name="thumbs-up" size={16} color="#0079d3" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDislikeReply(item.id)}>
-          <Text style={styles.actionText}>Dislike</Text>
+        <TouchableOpacity style={styles.iconButton} onPress={() => handleDislikeReply(item.id)}>
+          <FontAwesome5 name="thumbs-down" size={16} color="#ff4500" />
         </TouchableOpacity>
       </View>
       {editReplyId === item.id && (
@@ -371,13 +380,13 @@ const styles = StyleSheet.create({
   },
   postActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     marginVertical: 8,
   },
   voteActions: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginTop: 8,
+    justifyContent: 'center',
+    marginVertical: 8,
   },
   sectionTitle: {
     fontSize: 18,
@@ -407,6 +416,8 @@ const styles = StyleSheet.create({
   },
   replyActions: {
     flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginVertical: 4,
   },
   actionText: {
     fontSize: 14,
@@ -438,6 +449,22 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginBottom: 12,
+  },
+  iconButton: {
+    marginHorizontal: 10,
+    padding: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  replyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start', // You can also try: 'flex-start', 'flex-end', 'center', 'space-between', or 'space-around'
   },
 });
 
