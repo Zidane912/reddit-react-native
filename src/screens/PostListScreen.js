@@ -108,10 +108,10 @@ function PostListScreen() {
         placeholderTextColor="#999"
       />
 
-      {/* Create Post Button */}
+      {/* Create Post Button
       <TouchableOpacity style={styles.createButton} onPress={() => navigation.navigate('CreatePost')}>
         <Text style={styles.createButtonText}>Create Post</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Posts List or Loading Indicator */}
       {loading ? (

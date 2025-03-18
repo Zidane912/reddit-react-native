@@ -6,7 +6,7 @@ import {
   Alert, 
   StyleSheet, 
   Text, 
-  FlatList 
+  ScrollView 
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { createPost } from '../api/posts';
@@ -52,69 +52,59 @@ function CreatePostScreen() {
         category_id: parseInt(selectedCategory),
       });
       Alert.alert('Success', 'Post created successfully');
-      navigation.navigate('PostDetail', { postId: newPost.id });
+      // Navigate directly to MainStack instead of PostDetail
+      navigation.navigate('MainStack');
     } catch (error) {
       console.error(error);
       Alert.alert('Error', 'Could not create post');
     }
   };
 
-  // Render the form as a header component
-  const renderForm = () => (
-    <View style={styles.card}>
-      <TextInput
-        style={styles.input}
-        placeholder="Title"
-        placeholderTextColor="#777"
-        value={title}
-        onChangeText={setTitle}
-      />
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Content"
-        placeholderTextColor="#777"
-        value={content}
-        onChangeText={setContent}
-        multiline
-      />
-      <Text style={styles.label}>Select Category:</Text>
-      <DropDownPicker
-        open={open}
-        value={selectedCategory}
-        items={items}
-        setOpen={setOpen}
-        setValue={setSelectedCategory}
-        setItems={setItems}
-        containerStyle={styles.dropdownContainer}
-        style={styles.dropdown}
-        dropDownContainerStyle={styles.dropdownList}
-      />
-      <View style={styles.buttonWrapper}>
-        <Button title="Create Post" onPress={handleSave} color="#ff4500" />
-      </View>
-    </View>
-  );
-
   return (
-    <FlatList
-      data={[]}  // Since your form isn't really a list, leave data empty
-      keyExtractor={() => 'dummy'}
-      ListHeaderComponent={
-        <View style={styles.container}>
-          <Text style={styles.header}>Create Post</Text>
-          {renderForm()}
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.header}>Create Post</Text>
+      <View style={styles.card}>
+        <TextInput
+          style={styles.input}
+          placeholder="Title"
+          placeholderTextColor="#777"
+          value={title}
+          onChangeText={setTitle}
+        />
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          placeholder="Content"
+          placeholderTextColor="#777"
+          value={content}
+          onChangeText={setContent}
+          multiline
+        />
+        <Text style={styles.label}>Select Category:</Text>
+        <DropDownPicker
+          open={open}
+          value={selectedCategory}
+          items={items}
+          setOpen={setOpen}
+          setValue={setSelectedCategory}
+          setItems={setItems}
+          containerStyle={styles.dropdownContainer}
+          style={styles.dropdown}
+          dropDownContainerStyle={styles.dropdownList}
+        />
+        <View style={styles.buttonWrapper}>
+          <Button title="Create Post" onPress={handleSave} color="#ff4500" />
         </View>
-      }
-      renderItem={null}
-    />
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#f6f7f8',
     padding: 16,
+    justifyContent: 'center', // Adjust if you want content centered vertically
   },
   header: {
     fontSize: 28,
